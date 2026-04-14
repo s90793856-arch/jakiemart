@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Checkout</title>
+</head>
+<body>
+
+<h1>🧾 Checkout Page</h1>
+
+<div>
+
+    {% for item in items %}
+        <div>
+            <h3>{{ item.product.name }}</h3>
+            <p>Qty: {{ item.quantity }}</p>
+            <p>Price: ${{ item.product.price }}</p>
+        </div>
+        <hr>
+    {% endfor %}
+
+</div>
+
+<h2>Total: ${{ total }}</h2>
+
+<button style="padding:10px 20px; background:green; color:white;">
+    Pay Now
+</button>
+
+</body>
+</html>

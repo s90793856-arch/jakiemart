@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Orders</title>
+    <link rel="stylesheet" href="{% static 'myapp/css/style.css' %}">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="topbar">
+    <div class="logo">🟠 MyShop</div>
+
+    <div class="nav">
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'cart' %}">Cart</a>
+    </div>
+</div>
+
+<h1 style="padding:20px;">📦 My Orders</h1>
+
+<!-- ORDERS LIST -->
+{% for order in orders %}
+    <div class="order">
+
+        <h3>Order #{{ order.id }}</h3>
+        <p>Total: ${{ order.total }}</p>
+        <p>Status: {% if order.paid %}Paid ✅{% else %}Pending ⏳{% endif %}</p>
+        <p>Date: {{ order.created_at }}</p>
+
+    </div>
+{% empty %}
+    <p style="padding:20px;">No orders yet 🛒</p>
+{% endfor %}
+
+</body>
+</html>
