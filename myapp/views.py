@@ -1,47 +1,17 @@
 import requests
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.db.models import Q
 from django.http import JsonResponse
-
 from .models import Product, Cart, Order, OrderItem
 
 
-# ================= HOME =================
+# 🏠 HOME PAGE
 def home(request):
     products = Product.objects.all()
-
-    cart_count = 0
-    if request.user.is_authenticated:
-        cart_count = sum(item.quantity for item in Cart.objects.filter(user=request.user))
-
-    return render(request, "myapp/home.html", {
-        "products": products,
-        "cart_count": cart_count
-    })
+    return render(request, "myapp/home.html", {"products": products})
 
 
-# ================= SEARCH =================
-def search_products(request):
-    query = request.GET.get("q")
-    products = Product.objects.all()
-
-    if query:
-        products = products.filter(
-            Q(name__icontains=query) |
-            Q(description__icontains=query)
-        )
-
-    return render(request, "myapp/home.html", {
-        "products": products,
-        "cart_count": 0,
-        "query": query
-    })
-
-
-# ================= ADD TO CART =================
-@login_required
+# 🛒 ADD TO CART
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
 
@@ -50,15 +20,13 @@ def add_to_cart(request, product_id):
         product=product
     )
 
-    if not created:
-        item.quantity += 1
-        item.save()
+    item.quantity += 1
+    item.save()
 
     return redirect("home")
 
 
-# ================= CART =================
-@login_required
+# 🛒 VIEW CART
 def view_cart(request):
     items = Cart.objects.filter(user=request.user)
 
@@ -70,39 +38,30 @@ def view_cart(request):
     })
 
 
-# ================= REMOVE ITEM =================
-@login_required
-def remove_item(request, cart_id):
-    item = get_object_or_404(Cart, id=cart_id, user=request.user)
-    item.delete()
-    return JsonResponse({"removed": True})
-
-
-# ================= INCREASE QTY =================
-@login_required
+# ➕ INCREASE
 def increase_qty(request, cart_id):
-    item = get_object_or_404(Cart, id=cart_id, user=request.user)
+    item = Cart.objects.get(id=cart_id)
     item.quantity += 1
     item.save()
-    return JsonResponse({"quantity": item.quantity})
+    return JsonResponse({"qty": item.quantity})
 
 
-# ================= DECREASE QTY =================
-@login_required
+# ➖ DECREASE
 def decrease_qty(request, cart_id):
-    item = get_object_or_404(Cart, id=cart_id, user=request.user)
-
+    item = Cart.objects.get(id=cart_id)
     if item.quantity > 1:
         item.quantity -= 1
         item.save()
-    else:
-        item.delete()
-
-    return JsonResponse({"deleted": True})
+    return JsonResponse({"qty": item.quantity})
 
 
-# ================= PAYSTACK CHECKOUT =================
-@login_required
+# ❌ REMOVE ITEM (AJAX)
+def remove_item(request, cart_id):
+    Cart.objects.filter(id=cart_id).delete()
+    return JsonResponse({"removed": True})
+
+
+# 💳 PAYSTACK CHECKOUT
 def create_checkout_session(request):
     items = Cart.objects.filter(user=request.user)
 
@@ -112,13 +71,13 @@ def create_checkout_session(request):
 
     headers = {
         "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
     }
 
     data = {
         "email": request.user.email,
         "amount": int(total * 100),
-        "callback_url": "http://127.0.0.1:8000/paystack-success/",
+        "callback_url": "http://127.0.0.1:8000/payment-success/"
     }
 
     response = requests.post(url, json=data, headers=headers)
@@ -127,8 +86,7 @@ def create_checkout_session(request):
     return redirect(res["data"]["authorization_url"])
 
 
-# ================= PAYMENT SUCCESS =================
-@login_required
+# ✅ SUCCESS PAGE
 def paystack_success(request):
     items = Cart.objects.filter(user=request.user)
 
@@ -137,8 +95,7 @@ def paystack_success(request):
     order = Order.objects.create(
         user=request.user,
         total=total,
-        paid=True,
-        payment_method="paystack"
+        paid=True
     )
 
     for item in items:
@@ -151,14 +108,4 @@ def paystack_success(request):
 
     items.delete()
 
-    return redirect("orders")
-
-
-# ================= ORDERS =================
-@login_required
-def my_orders(request):
-    orders = Order.objects.filter(user=request.user).order_by("-created_at")
-
-    return render(request, "myapp/orders.html", {
-        "orders": orders
-    })
+    return render(request, "myapp/success.html")

@@ -1,63 +1,45 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>JakieMart</title>
-    <link rel="stylesheet" href="{% static 'myapp/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
+
 <body>
 
-<!-- ================= TOP BAR ================= -->
+<!-- TOP BAR -->
 <div class="topbar">
-
     <div class="logo">🟠 JakieMart</div>
 
-    <!-- SEARCH -->
-    <form class="search" action="{% url 'search' %}" method="GET">
-        <input type="text" name="q" placeholder="Search products...">
-        <button type="submit">Search</button>
-    </form>
+    <input type="text" class="search" placeholder="Search products...">
 
-    <!-- NAV -->
     <div class="nav">
-        <a href="{% url 'home' %}">Home</a>
-
-        <a href="{% url 'cart' %}">
-            Cart 🛒 <span class="badge">{{ cart_count }}</span>
-        </a>
-
-        <a href="{% url 'orders' %}">My Orders</a>
+        <a href="/">Home</a>
+        <a href="/cart/">Cart</a>
     </div>
-
 </div>
 
-<!-- ================= HERO ================= -->
+<!-- HERO -->
 <div class="hero">
-    <h1>🔥 Welcome to JakieMart</h1>
-    <p>Best Deals in Ghana & Worldwide</p>
+    <h2>Welcome to JakieMart</h2>
 </div>
 
-<!-- ================= PRODUCTS ================= -->
+<!-- PRODUCTS -->
 <div class="products">
-
     {% for product in products %}
     <div class="product">
-
-        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+        <img src="{{ product.image.url }}" class="img">
 
         <h3>{{ product.name }}</h3>
+        <p>₵{{ product.price }}</p>
 
-        <p class="price">${{ product.price }}</p>
-
-        <p>{{ product.description|default:"No description" }}</p>
-
-        <a class="btn" href="{% url 'add_to_cart' product.id %}">
+        <a href="{% url 'add_to_cart' product.id %}" class="btn">
             Add to Cart
         </a>
-
     </div>
     {% endfor %}
-
 </div>
 
 </body>

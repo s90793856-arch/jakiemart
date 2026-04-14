@@ -126,4 +126,5 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 from decouple import config
 
-PAYSTACK_SECRET_KEY = config("sk_test_acbc9192aa4679a94ede5e8276997b72cd173a50")
+PAYSTACK_SECRET_KEY = config("PAYSTACK_SECRET_KEY")
+ALLOWED_HOSTS = ["*"]

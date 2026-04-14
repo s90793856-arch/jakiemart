@@ -18,7 +18,7 @@ urlpatterns = [
 
     # CHECKOUT + ORDERS
     path('checkout/', views.create_checkout_session, name='checkout'),
-    path('payment-success/', views.payment_success, name='success'),
+    path('payment-success/', views.paystack_success, name='success'),
     path('orders/', views.my_orders, name='orders'),
 path('search/', views.search_products, name='search'),
 ]
